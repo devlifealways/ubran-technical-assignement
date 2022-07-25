@@ -98,7 +98,7 @@ resource "google_container_node_pool" "general" {
     machine_type = var.gcp_machine_flavor
 
     labels = {
-      role = "devops"
+      role = terraform.workspace
     }
 
     service_account = google_service_account.kubernetes.email
@@ -130,6 +130,7 @@ resource "google_container_node_pool" "spot" {
 
     labels = {
       team = "devops"
+      enviroment = terraform.workspace
     }
 
     taint {
