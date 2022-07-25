@@ -1,0 +1,134 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+  labels:
+  name: traefik
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/name: urban-technical-test
+    app.kubernetes.io/part-of: urban-interview
+    app.kubernetes.io/created-by: hamza-rouineb
+  name: urban
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  name: urban-technical-test
+  namespace: urban
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: ubran-technical-test.rouineb.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: urban-technical-test
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - ubran-technical-test.rouineb.com
+      secretName: ubran-technical-test-tls # could have used cert-manager or any solution to handle this automatically
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: urban-technical-test
+  namespace: urban
+  labels:
+    app.kubernetes.io/name: urban-technical-test
+    app.kubernetes.io/version: "0.0.1"
+    app.kubernetes.io/part-of: urban-interview
+    app.kubernetes.io/created-by: hamza-rouineb
+spec:
+  type: Service
+  selector:
+    app.kubernetes.io/name: urban-technical-test
+    app.kubernetes.io/version: "0.0.1"
+    app.kubernetes.io/part-of: urban-interview
+    app.kubernetes.io/created-by: hamza-rouineb
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 3000
+---
+# override default application behavior
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: urban-technical-test
+  namespace: urban
+  labels:
+    app.kubernetes.io/name: urban-technical-test
+    app.kubernetes.io/version: "0.0.1"
+    app.kubernetes.io/part-of: urban-interview
+    app.kubernetes.io/created-by: hamza-rouineb
+data:
+  PORT: "3000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: urban-technical-test
+  namespace: urban
+  labels:
+    app.kubernetes.io/name: urban-technical-test
+    app.kubernetes.io/version: "0.0.1"
+    app.kubernetes.io/part-of: urban-interview
+    app.kubernetes.io/created-by: hamza-rouineb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: urban-technical-test
+      app.kubernetes.io/version: "0.0.1"
+      app.kubernetes.io/part-of: urban-interview
+      app.kubernetes.io/created-by: hamza-rouineb
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        # checksum/config: "{{ configmap | checksum }}" # we need to restart the pod when configuration changes
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000" # this also should change in case configmap changes
+        prometheus.io/path: "/metrics"
+      labels:
+        app.kubernetes.io/name: urban-technical-test
+        app.kubernetes.io/version: "0.0.1"
+        app.kubernetes.io/part-of: urban-interview
+        app.kubernetes.io/created-by: hamza-rouineb
+    spec:
+      containers:
+        - name: urban-technical-test
+          image: devlifealways/urban-technical-test
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000 # if at runtime something changes this will have to change also !
+          envFrom:
+            - configMapRef:
+                name: urban-technical-test
+          resources: # not base on any load tests
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
