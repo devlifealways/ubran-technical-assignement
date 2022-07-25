@@ -4,7 +4,7 @@ variable "gcp_routing_mode" {
   type        = string
 }
 
-variable "region" {
+variable "gcp_region" {
   description = "Which region should be it deployed to (required)"
   type        = string
 }
@@ -24,7 +24,7 @@ variable "gcp_private_subnet_name" {
   }
 }
 
-variable "project_id" {
+variable "gcp_project_id" {
   description = "Google project identifier (required)"
   type        = string
 }
