@@ -1,8 +1,7 @@
-# Ubran technical test
+# Urban technical test
 
 During this pleasent adventure I had to run these instructions to get going
 and deploy everything:
-
 
 ## GCP setup
 
@@ -19,7 +18,6 @@ $ gsutil versioning set on gs://tf-state-ubran-technical-test/
 # give enough rights to the SA
 $ gsutil iam ch serviceAccount:urban-technical-test@digital-display-357013.iam.gserviceaccount.com:legacyBucketWriter gs://tf-state-ubran-technical-test/
 ```
-
 
 ## Docker
 
@@ -46,6 +44,5 @@ Things to make better:
 - better cost effective strategies
 - usage of podSecurityPolicy to restrict communcation between pods
 - add grafana dashboard to evaluate /metrics that we set
-
-
-
+- better logging
+- add Terraform's integration test using [terraform-exec](https://github.com/hashicorp/terraform-exec) (programmatically execute commands)
