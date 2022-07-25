@@ -14,7 +14,12 @@ const counter = new client.Counter({
   registers: [registry],
 });
 
-app.get('/', (req: express.Request, res: express.Response) => {
+registry.setDefaultLabels({
+  application:'urban-technical-test',
+  env: environment
+});
+
+app.get("/", (req: express.Request, res: express.Response) => {
   const response = {
     hostname: req.hostname,
     uptime: process.uptime(),
