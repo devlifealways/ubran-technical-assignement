@@ -17,6 +17,16 @@ locals {
   nat_name            = "${var.gcp_namespace}-nat"
 }
 
+resource "google_project_service" "compute" {
+  project = var.gcp_project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "container" {
+  project = var.gcp_project_id
+  service = "container.googleapis.com"
+}
+
 # could use terraform-google-modules/network/google
 resource "google_compute_network" "main" {
   name                            = local.network_name
@@ -25,6 +35,11 @@ resource "google_compute_network" "main" {
   auto_create_subnetworks         = false
   mtu                             = var.gcp_mtu
   delete_default_routes_on_create = false
+
+  depends_on = [
+    google_project_service.compute,
+    google_project_service.container
+  ]
 }
 
 resource "google_compute_subnetwork" "private" {
@@ -77,4 +92,8 @@ resource "google_compute_address" "nat" {
   network_tier = "PREMIUM"
 
   region = var.gcp_region
+
+  depends_on = [
+    google_project_service.compute
+  ]
 }
