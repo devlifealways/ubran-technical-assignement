@@ -14,6 +14,16 @@ variable "gcp_organization_id" {
   type        = number
 }
 
+variable "gcp_mtu" {
+  description = "Maximum Transmission Unit in bytes (optional)"
+  type        = number
+  default     = 1500
+  validation {
+    condition     = var.gcp_mtu <= 1500 && var.gcp_mtu >= 1460
+    error_message = "The minimum value for this field is 1460 and the maximum value is 1500 bytes"
+  }
+}
+
 variable "gcp_private_subnet_name" {
   description = "Private subnetwork name (optional)"
   type        = string
