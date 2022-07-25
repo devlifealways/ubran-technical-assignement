@@ -1,3 +1,5 @@
+.editorconfig
+.gitignore
 .prettier
 README.md
 node_modules
