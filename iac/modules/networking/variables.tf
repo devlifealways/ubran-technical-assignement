@@ -54,3 +54,9 @@ variable "gcp_flow_log_sampling" {
     error_message = "The value of the field must be in [0, 1]"
   }
 }
+
+variable "gcp_enable_policies" {
+  default     = 0
+  type        = number
+  description = "Either to enable to enforce them or not"
+}
