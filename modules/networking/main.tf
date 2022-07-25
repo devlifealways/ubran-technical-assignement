@@ -50,6 +50,12 @@ resource "google_compute_subnetwork" "private" {
   network                  = google_compute_network.main.id
   private_ip_google_access = true # access google APIs and services (db ...etc.)
 
+  log_config {
+    aggregation_interval = "INTERVAL_15_MIN"
+    flow_sampling        = var.gcp_flow_log_sampling
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+
   dynamic "secondary_ip_range" {
     for_each = local.secondary_ip_ranges
 

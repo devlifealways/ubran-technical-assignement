@@ -44,3 +44,13 @@ variable "gcp_namespace" {
   type        = string
   default     = "urban"
 }
+
+variable "gcp_flow_log_sampling" {
+  description = "Records a sample of network flows sent from and received by VM instances (optional)"
+  type        = number
+  default     = 0
+  validation {
+    condition     = var.gcp_flow_log_sampling <= 1 && var.gcp_flow_log_sampling >= 0
+    error_message = "The value of the field must be in [0, 1]"
+  }
+}
