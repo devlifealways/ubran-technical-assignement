@@ -26,11 +26,20 @@ app.get("/", (req: express.Request, res: express.Response) => {
     podname: process.env.HOSTNAME,
   };
 
+  if (isDev){
+    console.log(`/ called with these headers ${JSON.stringify(req.headers)}`);
+  }
+
   counter.inc();
   res.status(200).send(response);
 });
 
 app.get("/metrics", async (req: express.Request, res : express.Response) => {
+
+  if (isDev){
+    console.log(`/metrics called with these headers ${JSON.stringify(req.headers)}`);
+  }
+
   res.setHeader("Content-Type", client.register.contentType);
   res.end(await registry.metrics());
 });
