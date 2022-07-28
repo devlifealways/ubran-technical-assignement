@@ -1,4 +1,4 @@
-# Terraform Kubernetes Engine Module
+# Terraform Networking Module
 
 This atomic module handles opinionated GKE's network creation and configuration, Firewalls and Network Policies
 

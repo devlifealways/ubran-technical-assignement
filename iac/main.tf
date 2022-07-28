@@ -16,11 +16,12 @@
 # }
 
 module "networking" {
-  source              = "./modules/networking"
-  gcp_project_id      = var.gcp_project_id
-  gcp_region          = var.gcp_region
-  gcp_namespace       = var.gcp_namespace
-  gcp_organization_id = var.gcp_organization_id
+  source                      = "./modules/networking"
+  gcp_project_id              = var.gcp_project_id
+  gcp_region                  = var.gcp_region
+  gcp_namespace               = var.gcp_namespace
+  gcp_organization_id         = var.gcp_organization_id
+  gcp_vpc_secondary_ip_ranges = var.gcp_vpc_secondary_ip_ranges
 }
 
 locals {
@@ -28,6 +29,15 @@ locals {
   sa_name             = "${var.gcp_namespace}-kubernetes"
   node_pool_name      = "${var.gcp_namespace}-general"
   node_pool_spot_name = "${var.gcp_namespace}-spot"
+
+  # BETA features
+  # cluster_istio_enabled                    = !local.cluster_output_istio_disabled
+  # cluster_dns_cache_enabled                = var.dns_cache
+  # cluster_telemetry_type_is_set            = var.cluster_telemetry_type != null
+  # cluster_pod_security_policy_enabled      = local.cluster_output_pod_security_policy_enabled
+  # cluster_intranode_visibility_enabled     = local.cluster_output_intranode_visbility_enabled
+  # cluster_vertical_pod_autoscaling_enabled = local.cluster_output_vertical_pod_autoscaling_enabled
+  # confidential_node_config                 = var.enable_confidential_nodes == true ? [{ enabled = true }] : []
 }
 
 # kubernetes cluster
@@ -39,8 +49,8 @@ resource "google_container_cluster" "primary" {
   initial_node_count       = 1 # doesn't matter it will be destroyed anyway
   network                  = module.networking.network_self_link
   subnetwork               = module.networking.private_subnetwork_link
-  logging_service          = var.gcp_enable_logging == 1 ? "logging.googleapis.com/kubernetes" : null       # fleuntbit agent on each node and scrap all logs of your applications
-  monitoring_service       = var.gcp_enable_monitoring == 1 ? "monitoring.googleapis.com/kubernetes" : null # if you wish to use prometheus, then disable this
+  logging_service          = var.gcp_enable_logging ? "logging.googleapis.com/kubernetes" : null       # fleuntbit agent on each node and scrap all logs of your applications
+  monitoring_service       = var.gcp_enable_monitoring ? "monitoring.googleapis.com/kubernetes" : null # if you wish to use prometheus, then disable this
   networking_mode          = "VPC_NATIVE"
   node_locations           = var.gcp_node_locations
 
@@ -92,6 +102,11 @@ resource "google_container_node_pool" "general" {
     auto_upgrade = true
   }
 
+  autoscaling {
+    min_node_count = var.gcp_primary_pool_autoscaling_min_count
+    max_node_count = var.gcp_primary_pool_autoscaling_max_count
+  }
+
   node_config {
     disk_size_gb = var.gcp_node_pool_disk_size # free-tier
     preemptible  = false
@@ -120,8 +135,8 @@ resource "google_container_node_pool" "spot" {
   }
 
   autoscaling {
-    min_node_count = var.gcp_autoscaling_min_count
-    max_node_count = var.gcp_autoscaling_max_count
+    min_node_count = var.gcp_spot_pool_autoscaling_min_count
+    max_node_count = var.gcp_spot_pool_autoscaling_max_count
   }
 
   node_config {
@@ -129,7 +144,7 @@ resource "google_container_node_pool" "spot" {
     machine_type = var.gcp_machine_flavor
 
     labels = {
-      team = "devops"
+      team       = "devops"
       enviroment = terraform.workspace
     }
 

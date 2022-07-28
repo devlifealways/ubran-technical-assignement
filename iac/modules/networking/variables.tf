@@ -60,3 +60,13 @@ variable "gcp_enable_policies" {
   type        = number
   description = "Either to enable to enforce them or not"
 }
+
+variable "gcp_vpc_secondary_ip_ranges" {
+  description = "An array of configurations for secondary IP ranges for VM instances contained in this subnetwork"
+  type = map(object({
+    secondary_range = object({
+      range_name    = string
+      ip_cidr_range = string
+    })
+  }))
+}

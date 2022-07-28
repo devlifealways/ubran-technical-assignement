@@ -5,11 +5,6 @@
 # servicenetworking.googleapis.com
 
 locals {
-  secondary_ip_ranges = {
-    "k8s-pod-ips" = "10.48.0.0/14",
-    "k8s-svc-ips" = "10.52.0.0/20"
-  }
-
   # here we can enforce our conventions
   network_name        = "${var.gcp_namespace}-main"
   private_subnet_name = "${var.gcp_namespace}-private"
@@ -57,11 +52,11 @@ resource "google_compute_subnetwork" "private" {
   }
 
   dynamic "secondary_ip_range" {
-    for_each = local.secondary_ip_ranges
+    for_each = [for t in var.gcp_vpc_secondary_ip_ranges : t.secondary_range]
 
     content {
-      range_name    = secondary_ip_range.key
-      ip_cidr_range = secondary_ip_range.value
+      range_name    = secondary_ip_range.value.range_name
+      ip_cidr_range = secondary_ip_range.value.ip_cidr_range
     }
   }
 }

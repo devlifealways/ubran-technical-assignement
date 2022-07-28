@@ -33,16 +33,30 @@ variable "gcp_flow_log_sampling" {
   }
 }
 
-variable "gcp_autoscaling_min_count" {
+variable "gcp_spot_pool_autoscaling_min_count" {
   description = "Enables autoscaling min pods behavior (required)"
   type        = number
   validation {
-    condition     = var.gcp_autoscaling_min_count >= 0
+    condition     = var.gcp_spot_pool_autoscaling_min_count >= 0
     error_message = "Autoscaling min count should be a positive number (required)"
   }
 }
 
-variable "gcp_autoscaling_max_count" {
+variable "gcp_spot_pool_autoscaling_max_count" {
+  description = "Enables autoscaling max pods behavior (required)"
+  type        = number
+}
+
+variable "gcp_primary_pool_autoscaling_min_count" {
+  description = "Enables autoscaling min pods behavior (required)"
+  type        = number
+  validation {
+    condition     = var.gcp_primary_pool_autoscaling_min_count >= 0
+    error_message = "Autoscaling min count should be a positive number (required)"
+  }
+}
+
+variable "gcp_primary_pool_autoscaling_max_count" {
   description = "Enables autoscaling max pods behavior (required)"
   type        = number
 }
@@ -71,14 +85,14 @@ variable "gcp_mtu" {
 
 variable "gcp_enable_logging" {
   description = "Enable scrapping all of your applications logs using fluentbit agents, be aware it will cost you more (optional)"
-  type        = number
-  default     = 0
+  type        = bool
+  default     = false
 }
 
 variable "gcp_enable_monitoring" {
   description = "Enable monitoring all of your applications, be aware it will cost you more (optional)"
-  type        = number
-  default     = 0
+  type        = bool
+  default     = true
 }
 
 variable "gcp_node_pool_count" {
@@ -106,5 +120,30 @@ variable "gcp_node_locations" {
   validation {
     condition     = length(var.gcp_node_locations) > 0
     error_message = "At least specify one zone"
+  }
+}
+
+
+variable "gcp_vpc_secondary_ip_ranges" {
+  description = "An array of configurations for secondary IP ranges for VM instances contained in this subnetwork"
+  type = map(object({
+    secondary_range = object({
+      range_name    = string
+      ip_cidr_range = string
+    })
+  }))
+  default = {
+    pods = {
+      secondary_range = {
+        range_name    = "k8s-pod-ips"
+        ip_cidr_range = "10.48.0.0/14"
+      }
+    }
+    services = {
+      secondary_range = {
+        range_name    = "k8s-svc-ips"
+        ip_cidr_range = "10.52.0.0/20"
+      }
+    }
   }
 }
