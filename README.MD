@@ -3,7 +3,7 @@
 During this pleasent adventure I had to run these instructions to get going
 and deploy everything:
 
-## GCP setup
+## 1. GCP setup
 
 ```shell
 # create service account credentials
@@ -18,6 +18,10 @@ $ gsutil versioning set on gs://tf-state-ubran-technical-test/
 # give enough rights to the SA
 $ gsutil iam ch serviceAccount:urban-technical-test@digital-display-357013.iam.gserviceaccount.com:legacyBucketWriter gs://tf-state-ubran-technical-test/
 ```
+
+## 2. Ingress controller & Urban's helm chart setup
+
+Have a look [here](iac/kubernetes/README.md) everything is detailed
 
 ## Docker
 
